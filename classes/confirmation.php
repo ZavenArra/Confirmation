@@ -1,10 +1,51 @@
 <?
 
-Class confirmation {
+Class Confirmation {
+
+  private $type = NULL;
+  private $model = NULL;
+
+  private $controller;
+  private $action;
+  private $arguments;
 
   /*
-   * Sends an email with a link that calls action 'confirm' on the class matching 'confirmation name'
+   * Sends an email with a link that calls controller/action/arguments when the confirmation is accepts
    */
-  public static function email($emailAddress, $confirmationName){
+  public function __construct($type, $email, $controller, $action, array $arguments=NULL){
+    $this->type = $type;
+    $this->email = $email;
+    $this->controller = $controller;
+    $this->action = $action;
+    $this->arguments = $arguments;
+
+    $this->model= $this->createConfirmationModel(); 
   }
+
+  public function send(){
+    mail($this->email, $this->createMessageSubject(), $this->createMessageBody());
+  }
+
+  public function createMessageBody(){
+    $body = i18n::get('confirmation.'.$this->type.'.body');
+    $confirmationLink = url::base('confirmation/'.$this->model->confirmation_id, 'http');
+    return str_replace(':confirmationLink', $confirmationLink, $body);
+  }
+
+  public function createMessageSubject(){
+    return i18n::get('confirmation.'.$this->type.'.subject');
+  }
+
+  private function createConfirmationModel(){
+    $confirmation = ORM::Factory('confirmation');
+    $confirmation->email = $this->email;
+    $confirmation->controller = $this->controller;
+    $confirmation->action = $this->action;
+    if($this->arguments){
+      $confirmation->arguments = json_encode($this->arguments);
+    }
+    $confirmation->save();
+    return $confirmation;
+  }
+
 }
