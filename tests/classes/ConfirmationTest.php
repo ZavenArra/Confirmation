@@ -29,5 +29,17 @@ Class ConfirmationTest extends PHPUnit_Framework_TestCase
       $this->assertNotNull($body);
 
     }
+
+    /**
+     * @depends testConstructConfirmation
+     */
+    public function testConfirm($confirmation){
+      $body = confirmation::confirm($confirmation->id);
+    }
+
+    public function testConfirmFail(){
+      $rval = confirmation::confirm('#&*#$&*#$&*#$&*');
+      $this->assertFalse($rval);
+    }
   }
 

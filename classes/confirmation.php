@@ -36,6 +36,33 @@ Class Confirmation {
     return i18n::get('confirmation.'.$this->type.'.subject');
   }
 
+  public static function confirm($confirmation_id){
+    $confirmation = ORM::Factory('confirmation')
+      ->where('confirmation_id','=', $confirmation_id)
+      ->find();
+    if(!$confirmation->loaded()){
+      return false;
+    } else {
+      $body = $this->doRoute($confirmation);
+      $confirmation->confirmed=1;
+      $confirmation->save();
+      return $body;
+    }
+  }
+
+  private static function doRoute($confirmation){
+    $route = $confirmation->controller.'/'.$confirmation->action;
+    if($confirmation->arguments){
+      $arguments = json_decode($confirmation->arguments);
+      foreach($arguments as $arg){
+        $route .= $arg.'/';
+      }
+    }
+    $request = Request::Factory($route);
+    $body = $request->execute()->response->body();
+
+  }
+
   private function createConfirmationModel(){
     $confirmation = ORM::Factory('confirmation');
     $confirmation->email = $this->email;
