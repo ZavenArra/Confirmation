@@ -2,8 +2,8 @@
 
 Class Controller_Confirmation extends Controller {
 
-  public function action_process($confirmation_id){
-    $confirmed = confirmation::process($confirmation_id);
+  public function action_confirm($confirmation_id){
+    $confirmed = confirmation::confirm($confirmation_id);
 
     if($confirmed){
       $this->response->body($confirmed);

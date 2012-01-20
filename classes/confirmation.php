@@ -28,7 +28,7 @@ Class Confirmation {
 
   public function createMessageBody(){
     $body = i18n::get('confirmation.'.$this->type.'.body');
-    $confirmationLink = url::base('confirmation/'.$this->model->confirmation_id, 'http');
+    $confirmationLink = url::base('http').'confirmation/'.$this->model->confirmation_id;
     return str_replace(':confirmationLink', $confirmationLink, $body);
   }
 
@@ -40,10 +40,10 @@ Class Confirmation {
     $confirmation = ORM::Factory('confirmation')
       ->where('confirmation_id','=', $confirmation_id)
       ->find();
-    if(!$confirmation->loaded()){
+    if(!$confirmation->loaded() || $confirmation->confirmed){
       return false;
     } else {
-      $body = $this->doRoute($confirmation);
+      $body = self::doRoute($confirmation);
       $confirmation->confirmed=1;
       $confirmation->save();
       return $body;
@@ -55,11 +55,12 @@ Class Confirmation {
     if($confirmation->arguments){
       $arguments = json_decode($confirmation->arguments);
       foreach($arguments as $arg){
-        $route .= $arg.'/';
+        $route .= '/'.$arg;
       }
     }
     $request = Request::Factory($route);
-    $body = $request->execute()->response->body();
+    $body = $request->execute()->body();
+    return $body;
 
   }
 
