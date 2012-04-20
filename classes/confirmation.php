@@ -23,6 +23,9 @@ Class Confirmation {
   }
 
   public function send(){
+    $sender =  i18n::get('confirmation.'.$this->type.'.sender');
+    $headers   = array();
+    $headers[] = "From: $sender";
     mail($this->email, $this->createMessageSubject(), $this->createMessageBody());
   }
 
